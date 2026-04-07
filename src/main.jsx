@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import { UserContextProvider } from './context/UserContext.jsx'
 import { CourseContextProvider } from './context/courseContext.jsx'
+// export const server='https://lmsserver-1.onrender.com';
 export const server='https://lmsserver-1.onrender.com';
-//export const server='http://localhost:8080'
 
 
 createRoot(document.getElementById('root')).render(
