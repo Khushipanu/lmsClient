@@ -89,7 +89,7 @@ const checkoutHandler=async()=>{
   (<div className="course-description" > 
     <div className="course-header">
         
-        <img src={`${server}/${course.image}`} alt="" 
+        <img className="course-image" src={`${server}/${course.image}`} alt="" 
         />
         <div className="course-info" >
             <h2> {course.title}   </h2>
