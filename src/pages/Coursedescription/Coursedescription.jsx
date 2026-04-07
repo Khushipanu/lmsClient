@@ -63,6 +63,13 @@ const checkoutHandler=async()=>{
             setLoading(false)
         }
     },
+    modal: {
+        ondismiss: function(){
+            setLoading(false);
+            navigate("/");
+            toast.info("Payment cancelled");
+        }
+    },
     theme:{
         color:"#8a4baf"
 
