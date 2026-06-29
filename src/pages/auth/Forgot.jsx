@@ -59,8 +59,7 @@ import React, { useState } from 'react';
 import './auth.css';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import axios from 'axios';
-import { server } from '../../main';
+import api from '../../api/axios';
 
 const Forgot = () => {
   const [email, setEmail] = useState("");
@@ -72,7 +71,7 @@ const Forgot = () => {
     setBtnLoading(true);
 
     try {
-      const { data } = await axios.post(`${server}/api/user/forgot`, { email });
+      const { data } = await api.post("/api/user/forgot", { email });
       toast.success(data.message);
       navigate('/login');
     } catch (err) {

@@ -1,73 +1,101 @@
-.course-study-page{
-    padding:50px 0;
-    background-color:#f8fafc;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:80vh;
+.course-study-page {
+  padding: 4rem 1rem;
+  background-color: var(--bg);
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Image */
-.course-study-page img{
-    border-radius:10px;
-    margin-bottom:20px;
+.course-study-hero {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 700px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 
-/* Course title */
-.course-study-page h2{
-    font-size:26px;
-    color:#1e3a8a;
-    text-align:center;
-    margin-bottom:10px;
+.course-study-hero img {
+  width: 100%;
+  max-width: 320px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background-color: var(--border);
 }
 
-/* Description */
-.course-study-page h4{
-    font-size:20px;
-    color:#334155;
-    text-align:center;
-    max-width:700px;
-    margin-bottom:10px;
+.course-study-hero h2 {
+  font-size: 2rem;
+  color: var(--text);
+  margin: 0;
 }
 
-/* Author and duration */
-.course-study-page h5{
-    font-size:18px;
-    color:#475569;
-    text-align:center;
-    margin:5px 0;
+.course-study-hero .description {
+  font-size: 1rem;
+  color: var(--text-light);
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0;
 }
 
-/* Lecture link */
-.course-study-page a{
-    text-decoration:none;
-    background-color:white;
-    padding:8px 16px;
-    border:1px solid #3b82f6;
-    border-radius:6px;
-    color:#3b82f6;
-    margin-top:15px;
-    transition:0.3s;
+.course-study-hero .course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 0.95rem;
+  color: var(--text-light);
 }
 
-.course-study-page a:hover{
-    background-color:#3b82f6;
-    color:white;
+.course-study-hero .course-meta span {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-weight: 500;
 }
 
-/* Ask Doubt button */
-.ask-doubt-btn{
-    margin-top:20px;
-    padding:10px 20px;
-    background:#22c55e;
-    color:white;
-    border:none;
-    border-radius:6px;
-    font-size:16px;
-    cursor:pointer;
-    transition:0.3s;
+.course-study-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-.ask-doubt-btn:hover{
-    background:#16a34a;
+.watch-btn {
+  min-width: 160px;
+}
+
+.ask-doubt-btn {
+  padding: 10px 20px;
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 160px;
+}
+
+.ask-doubt-btn:hover {
+  background-color: #16a34a;
+}
+
+@media (max-width: 480px) {
+  .course-study-hero {
+    padding: 1.5rem;
+  }
+
+  .course-study-hero h2 {
+    font-size: 1.5rem;
+  }
 }

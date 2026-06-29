@@ -15,6 +15,10 @@
 
     }
     .right{
+        .toggle-form-btn{
+            margin-bottom: 1rem;
+            width: 100%;
+        }
         .course-form{
             background-color:#fff;
             padding:30px;

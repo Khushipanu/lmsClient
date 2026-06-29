@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import "./CourseStudy.css";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/courseContext";
-import { server } from "../../main";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const CourseStudy = ({ user }) => {
   const params = useParams();
@@ -13,7 +13,7 @@ const CourseStudy = ({ user }) => {
     if (
       user &&
       user.role !== "admin" &&
-      !user.subscription.includes(params.id)
+      !user.subscription?.includes(params.id)
     ) {
       navigate("/");
     } else {
@@ -25,27 +25,40 @@ const CourseStudy = ({ user }) => {
     <>
       {course && (
         <div className="course-study-page">
-          <img src={`${server}/${course.image}`} alt="" width={350} />
+          <div className="course-study-hero">
+            <img
+              src={getImageUrl(course.image)}
+              alt={course.title}
+              onError={(e) => { e.target.onerror = null; e.target.src = "/placeholder-course.svg"; }}
+            />
 
-          <h2>{course.title}</h2>
-          <h4>{course.description}</h4>
-          <h5>by - {course.createdBy}</h5>
-          <h5>Duration - {course.duration} weeks</h5>
+            <h2>{course.title}</h2>
+            <p className="description">{course.description}</p>
+            <div className="course-meta">
+              <span>Instructor: {course.createdBy}</span>
+              <span>Duration: {course.duration} weeks</span>
+            </div>
 
-          <Link to={`/lecture/${course._id}`}>
-            <h2>Lectures</h2>
-          </Link>
-
-          {user &&
-            user.subscription.includes(course._id) &&
-            user._id !== course.createdBy && (
+            <div className="course-study-actions">
               <button
-                className="ask-doubt-btn"
-                onClick={() => navigate(`/ask-query/${course._id}`)}
+                className="common-btn watch-btn"
+                onClick={() => navigate(`/lecture/${course._id}`)}
               >
-                Ask Doubt
+                Watch Lectures
               </button>
-            )}
+
+              {user &&
+                user.subscription?.includes(course._id) &&
+                user._id !== course.createdBy && (
+                  <button
+                    className="ask-doubt-btn"
+                    onClick={() => navigate(`/ask-query/${course._id}`)}
+                  >
+                    Ask Doubt
+                  </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </>

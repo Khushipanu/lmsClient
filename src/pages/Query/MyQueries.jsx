@@ -1,27 +1,17 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { server } from "../../main";
+import api from "../../api/axios";
+import Loading from "../../components/loading/Loading";
+import { HelpCircle, MessageSquare, Clock, CheckCircle } from "lucide-react";
+import "./Query.css";
 
 const MyQueries = () => {
-
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem("token");
-
   const fetchQueries = async () => {
-
     try {
-
-      const { data } = await axios.get(
-        `${server}/api/query/my`,
-        {
-          headers: { token }
-        }
-      );
-
+      const { data } = await api.get("/api/query/my");
       setQueries(data.queries);
-
     } catch (error) {
       console.log("Error fetching queries:", error);
     } finally {
@@ -34,77 +24,69 @@ const MyQueries = () => {
   }, []);
 
   if (loading) {
-    return <p style={{ padding: "30px" }}>Loading queries...</p>;
+    return (
+      <div className="query-page">
+        <Loading />
+      </div>
+    );
   }
 
   return (
-
-    <div style={{ padding: "30px" }}>
-
-      <h2>My Doubts</h2>
+    <div className="query-page">
+      <div className="query-header">
+        <HelpCircle size={28} />
+        <h2>My Doubts</h2>
+      </div>
 
       {queries.length === 0 ? (
-
-        <p>No doubts asked yet</p>
-
+        <div className="empty-state">
+          <MessageSquare size={48} />
+          <p>No doubts asked yet</p>
+        </div>
       ) : (
-
-        queries.map((q) => (
-
-          <div
-            key={q._id}
-            style={{
-              border: "1px solid #ddd",
-              padding: "20px",
-              marginBottom: "20px",
-              borderRadius: "8px",
-              background: "#fafafa"
-            }}
-          >
-
-            <p><b>Title:</b> {q.title}</p>
-
-            <p><b>Topic:</b> {q.topic}</p>
-
-            <p><b>Description:</b> {q.description}</p>
-
-            <p>
-              <b>Status:</b>{" "}
-              {q.status === "pending" ? (
-                <span style={{ color: "orange" }}>Pending</span>
-              ) : (
-                <span style={{ color: "green" }}>Solved</span>
-              )}
-            </p>
-
-            {q.reply ? (
-
-              <div
-                style={{
-                  marginTop: "10px",
-                  padding: "10px",
-                  background: "#e8f5e9",
-                  borderRadius: "6px"
-                }}
-              >
-                <b>Instructor Reply:</b>
-                <p>{q.reply}</p>
+        <div className="query-list">
+          {queries.map((q) => (
+            <div key={q._id} className="query-card">
+              <div className="query-card-header">
+                <h3>{q.title}</h3>
+                <span
+                  className={`status-badge ${
+                    q.status === "pending" ? "pending" : "solved"
+                  }`}
+                >
+                  {q.status === "pending" ? (
+                    <>
+                      <Clock size={14} /> Pending
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={14} /> Solved
+                    </>
+                  )}
+                </span>
               </div>
 
-            ) : (
-
-              <p style={{ color: "orange" }}>
-                Waiting for instructor reply...
+              <p className="query-topic">
+                <strong>Topic:</strong> {q.topic}
               </p>
+              <p className="query-description">{q.description}</p>
 
-            )}
-
-          </div>
-
-        ))
-
+              {q.reply ? (
+                <div className="query-reply">
+                  <h4>
+                    <MessageSquare size={16} /> Instructor Reply
+                  </h4>
+                  <p>{q.reply}</p>
+                </div>
+              ) : (
+                <p className="query-waiting">
+                  <Clock size={14} /> Waiting for instructor reply...
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-
     </div>
   );
 };

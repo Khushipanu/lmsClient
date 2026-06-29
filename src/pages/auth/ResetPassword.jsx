@@ -2,8 +2,7 @@ import React from 'react'
 import "./auth.css"
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { server } from '../../main'
-import axios from 'axios'
+import api from '../../api/axios'
 import toast from 'react-hot-toast'
 
 const ResetPassword = () => {
@@ -16,7 +15,7 @@ const ResetPassword = () => {
         e.preventDefault();
         setBtnLoading(true)
         try{
-            const {data}=await axios.post(`${server}/api/user/reset?token=${params.token}`,{password})
+            const {data}=await api.post(`/api/user/reset?token=${params.token}`,{password})
             toast.success(data.message)
             navigate('/login')
             setBtnLoading(false)

@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/home/Home";
 import Header from "./components/header/Header";
@@ -12,6 +12,7 @@ import About from "./pages/about/About";
 import Account from "./pages/Account/Account";
 import { UserData } from "./context/UserContext";
 import Loading from "./components/loading/Loading";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Courses from "./pages/courses/Courses";
 import Coursedescription from "./pages/Coursedescription/Coursedescription";
 import Paymentsuccess from "./pages/Paymentsuccess/Paymentsuccess";
@@ -41,57 +42,57 @@ const App = () => {
 
           <Routes>
 
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<ProtectedRoute isAuth={isAuth}><Home /></ProtectedRoute>} />
 
-            <Route path="/about" element={<About />} />
+            <Route path="/about" element={<ProtectedRoute isAuth={isAuth}><About /></ProtectedRoute>} />
 
-            <Route path="/bot" element={<Bot />} />
+            <Route path="/bot" element={<ProtectedRoute isAuth={isAuth}><Bot /></ProtectedRoute>} />
 
-            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses" element={<ProtectedRoute isAuth={isAuth}><Courses /></ProtectedRoute>} />
 
             <Route
               path="/login"
-              element={isAuth ? <Home /> : <Login />}
+              element={isAuth ? <Navigate to="/" /> : <Login />}
             />
 
             <Route
               path="/account"
-              element={isAuth ? <Account user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><Account user={user} /></ProtectedRoute>}
             />
 
             <Route
               path="/register"
-              element={isAuth ? <Home /> : <Register />}
+              element={isAuth ? <Navigate to="/" /> : <Register />}
             />
 
             <Route
               path="/verify"
-              element={isAuth ? <Home /> : <Verify />}
+              element={isAuth ? <Navigate to="/" /> : <Verify />}
             />
 
             <Route
               path="/course/:id"
-              element={isAuth ? <Coursedescription user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><Coursedescription user={user} /></ProtectedRoute>}
             />
 
             <Route
               path="/payment-success/:id"
-              element={isAuth ? <Paymentsuccess user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><Paymentsuccess user={user} /></ProtectedRoute>}
             />
 
             <Route
               path="/:id/dashboard"
-              element={isAuth ? <Dashboard user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><Dashboard user={user} /></ProtectedRoute>}
             />
 
             <Route
               path="/course/study/:id"
-              element={isAuth ? <CourseStudy user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><CourseStudy user={user} /></ProtectedRoute>}
             />
 
             <Route
               path="/lecture/:id"
-              element={isAuth ? <Lecture user={user} /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><Lecture user={user} /></ProtectedRoute>}
             />
 
             <Route
@@ -99,9 +100,7 @@ const App = () => {
               element={
                 isAuth && user?.role === "admin"
                   ? <AdminDashboard user={user} />
-                  : isAuth && user
-                  ? <Home />
-                  : <Login />
+                  : <Navigate to={isAuth ? "/" : "/login"} />
               }
             />
 
@@ -110,20 +109,18 @@ const App = () => {
               element={
                 isAuth && user?.role === "admin"
                   ? <AdminCourses user={user} />
-                  : isAuth && user
-                  ? <Home />
-                  : <Login />
+                  : <Navigate to={isAuth ? "/" : "/login"} />
               }
             />
 
             <Route
               path="/forgot"
-              element={isAuth ? <Home /> : <Forgot />}
+              element={isAuth ? <Navigate to="/" /> : <Forgot />}
             />
 
             <Route
               path="/reset-password/:token"
-              element={isAuth ? <Home /> : <ResetPassword />}
+              element={isAuth ? <Navigate to="/" /> : <ResetPassword />}
             />
 
             <Route
@@ -134,9 +131,18 @@ const App = () => {
             {/* Student Ask Query */}
             <Route
               path="/ask-query/:courseId"
-              element={isAuth ? <AskQuery /> : <Login />}
+              element={<ProtectedRoute isAuth={isAuth}><AskQuery /></ProtectedRoute>}
             />
-            <Route path="/my-queries" element={isAuth?<MyQueries/>:<Login/>}/>
+            <Route
+              path="/my-queries"
+              element={
+                isAuth
+                  ? user?.role === "admin"
+                    ? <Navigate to="/instructor" />
+                    : <MyQueries />
+                  : <Navigate to="/login" />
+              }
+            />
 
             {/* Instructor View Queries */}
             <Route
@@ -144,9 +150,7 @@ const App = () => {
               element={
                 isAuth && user?.role === "admin"
                   ? <InstructorQuery />
-                  : isAuth
-                  ? <Home />
-                  : <Login />
+                  : <Navigate to={isAuth ? "/" : "/login"} />
               }
             />
            

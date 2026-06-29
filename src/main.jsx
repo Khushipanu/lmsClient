@@ -1,22 +1,23 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
+import './index.css'
 import { UserContextProvider } from './context/UserContext.jsx'
 import { CourseContextProvider } from './context/courseContext.jsx'
-// export const server='https://lmsserver-1.onrender.com';
-// Use VITE_API_URL in client/.env so it matches server PORT (defaults align with server: 5000 when unset).
-export const server =
-  import.meta.env.VITE_API_URL || "http://localhost:8080";
+import { ThemeProvider } from './context/ThemeContext.jsx'
 
+// Backward-compatible server URL export (default matches Express server port 5000)
+export const server =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 createRoot(document.getElementById('root')).render(
-  
-    <UserContextProvider>
-      <CourseContextProvider>
-         <App />
-      </CourseContextProvider>
-   
-    </UserContextProvider>
-  
-  
+  <StrictMode>
+    <ThemeProvider>
+      <UserContextProvider>
+        <CourseContextProvider>
+          <App />
+        </CourseContextProvider>
+      </UserContextProvider>
+    </ThemeProvider>
+  </StrictMode>
 )

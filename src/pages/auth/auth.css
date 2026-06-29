@@ -3,14 +3,14 @@
     align-items:center;
     justify-content:center;
     height:80vh;
-    background-color:white;
+    background-color:var(--bg);
 
 }
 .auth-page .auth-form{
-    background-color:#fff;
+    background-color:var(--card);
     padding:30px;
     border-radius:10px;
-    box-shadow:0px 2px 4px rgba(0,0,0,0.1);
+    box-shadow:var(--shadow);
     text-align:center;
     width:300px;
 
@@ -18,7 +18,7 @@
 }
 .auth-page .auth-form h2{
     font-size:25px;
-    color:#3b82f6;
+    color:var(--primary);
     margin-bottom:15px;
 
 }
@@ -31,32 +31,36 @@
     width: 100%;
     padding: 10px;
     margin-bottom: 15px;
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     border-radius:5px;
     font-size: 14px;
+    background-color:var(--card);
+    color:var(--text);
 }
 
 .auth-page .auth-form form label{
     display:block;
     margin-bottom:5px;
     font-size:14px;
-    color:#334155;
+    color:var(--text-light);
 }
 .auth-page .auth-form form input{
     width:92%;
     padding:10px;
     margin-bottom:15px;
-    border:1px solid #ccc;
+    border:1px solid var(--border);
     border-radius:5px;
+    background-color:var(--card);
+    color:var(--text);
 
 }
 
 .google-btn {
   margin-top: 15px;
   width: 100%;
-  background-color: white;
-  color: #444;
-  border: 1px solid #ddd;
+  background-color: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 10px;
   border-radius: 6px;
   display: flex;
@@ -69,8 +73,8 @@
 }
 
 .google-btn:hover {
-  background-color: #f7f7f7;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg);
+  box-shadow: var(--shadow);
 }
 
 .google-icon {
@@ -82,14 +86,14 @@
   display: flex;
   align-items: center;
   margin: 20px 0;
-  color: #666;
+  color: var(--text-light);
 }
 
 .divider::before,
 .divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
 }
 
 .divider span {
@@ -104,5 +108,16 @@
 .google-text {
   margin-bottom: 15px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-light);
+}
+
+.spin-icon{
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+  color: var(--primary);
+}
+
+@keyframes spin{
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

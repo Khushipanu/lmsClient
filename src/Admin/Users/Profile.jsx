@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import "./Profile.css"
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios';
-import { server } from '../../main';
+import api from '../../api/axios';
 import Layout from '../Utils/Layout';
 import toast from 'react-hot-toast';
 
 const Profile = ({user}) => {
     const navigate=useNavigate();
+    
+    const [name, setName] = useState(user?.name || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [password, setPassword] = useState("");
+    const [role, setRole] = useState(user?.role || "user");
+    const [btnLoading, setBtnLoading] = useState(false);
     
     // Double-check admin role - redirect if not admin
     useEffect(() => {
@@ -19,24 +24,14 @@ const Profile = ({user}) => {
     if (!user || user.role !== "admin") {
         return null; // Don't render anything while redirecting
     }
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState(user?.role || "user");
-  const [btnLoading, setBtnLoading] = useState(false);
-
 
     const updateHandler=async(e)=>{
         e.preventDefault();
         setBtnLoading(true)
 
         try{
-            const {data}=await axios.put(`${server}/api/user/updateProfile/${user._id}`,{
+            const {data}=await api.put(`/api/user/updateProfile/${user._id}`,{
                 name,email,password,role
-            },{
-                headers:{
-                    token:localStorage.getItem("token")
-                }
             })
             toast.success(data.message)
             setBtnLoading(false)

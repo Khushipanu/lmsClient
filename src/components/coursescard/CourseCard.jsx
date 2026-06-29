@@ -1,14 +1,14 @@
 
 import React from 'react'
 import "./CourseCard.css"
-import { server } from '../../main'
 import { UserData } from '../../context/UserContext'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../../api/axios'
 import { CourseData } from '../../context/courseContext'
 import toast from 'react-hot-toast'
+import { getImageUrl } from '../../utils/imageUrl'
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, showAdminActions = true }) => {
   const navigate = useNavigate()
   const { user, isAuth } = UserData()
   const { fetchCourses } = CourseData()
@@ -16,11 +16,7 @@ const CourseCard = ({ course }) => {
   const deleteHandler = async (id) => {
     if (confirm("Are you sure you want to delete this course?")) {
       try {
-        const { data } = await axios.delete(`${server}/api/course/${id}`, {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        })
+        const { data } = await api.delete(`/api/course/${id}`)
         toast.success(data.message)
         fetchCourses()
       } catch (err) {
@@ -38,7 +34,12 @@ const CourseCard = ({ course }) => {
   return (
     <div>
       <div className="course-card">
-        <img src={`${server}/${course.image}`} alt="" className="course-image" />
+        <img
+          src={getImageUrl(course.image)}
+          alt={course.title}
+          className="course-image"
+          onError={(e) => { e.target.src = "/placeholder-course.svg"; }}
+        />
         <h3>{course.title}</h3>
         <p>Instructor - {course.createdBy}</p>
         <p>Duration - {course.duration} weeks</p>
@@ -52,9 +53,9 @@ const CourseCard = ({ course }) => {
           </button>
         ) : (
           <>
-            {/* ✅ If NOT admin */}
-            {user.role !== "admin" ? (
-              user.subscription.includes(course._id) ? (
+            {/* ✅ If NOT admin OR public listing */}
+            {user.role !== "admin" || !showAdminActions ? (
+              user.subscription?.includes(course._id) ? (
                 <button
                   onClick={() => navigate(`/course/study/${course._id}`)}
                   className="common-btn"
@@ -70,7 +71,7 @@ const CourseCard = ({ course }) => {
                 </button>
               )
             ) : (
-              // ✅ If admin
+              // ✅ If admin in admin view
               <>
                 {isCreatedByAdmin ? (
                   <>

@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { server } from "../../main";
+import api from "../../api/axios";
+import Loading from "../../components/loading/Loading";
+import { MessageSquare, User, BookOpen, CheckCircle, Clock } from "lucide-react";
+import "./Query.css";
 
 const InstructorQueries = () => {
-
   const [queries, setQueries] = useState([]);
   const [replyText, setReplyText] = useState({});
-
-  const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
 
   const fetchQueries = async () => {
     try {
-
-      const { data } = await axios.get(
-        `${server}/api/query/instructor`,
-        {
-          headers: { token }
-        }
-      );
-
+      const { data } = await api.get("/api/query/instructor");
       setQueries(data.queries);
-
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,129 +24,113 @@ const InstructorQueries = () => {
     fetchQueries();
   }, []);
 
-
   const sendReply = async (id) => {
-
     const reply = replyText[id];
+    if (!reply?.trim()) return;
 
-    // clear textarea immediately
-    setReplyText({
-      ...replyText,
-      [id]: ""
-    });
+    setReplyText({ ...replyText, [id]: "" });
 
     try {
-
-      await axios.put(
-        `${server}/api/query/status/${id}`,
-        {
-          status: "solved",
-          reply: reply
-        },
-        {
-          headers: { token }
-        }
-      );
-
-      alert("Reply sent");
-
+      await api.put(`/api/query/status/${id}`, {
+        status: "solved",
+        reply: reply,
+      });
       fetchQueries();
-
     } catch (error) {
       console.log(error);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="query-page">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
-
-    <div style={{ padding: "30px" }}>
-
-      <h2>Student Doubts</h2>
+    <div className="query-page">
+      <div className="query-header">
+        <MessageSquare size={28} />
+        <h2>Students' Doubts</h2>
+      </div>
 
       {queries.length === 0 ? (
-
-        <p>No Queries Yet</p>
-
+        <div className="empty-state">
+          <MessageSquare size={48} />
+          <p>No doubts from students yet</p>
+        </div>
       ) : (
-
-        queries.map((q) => (
-
-          <div
-            key={q._id}
-            style={{
-              border: "1px solid #ddd",
-              padding: "20px",
-              marginBottom: "20px",
-              borderRadius: "8px"
-            }}
-          >
-
-            <p><b>Student:</b> {q.student?.name}</p>
-
-            <p><b>Course:</b> {q.course?.title}</p>
-
-            <p><b>Title:</b> {q.title}</p>
-
-            <p><b>Description:</b> {q.description}</p>
-
-
-            <p>
-              <b>Status:</b>{" "}
-              <span
-                style={{
-                  background: q.status === "pending" ? "#d4edda" : "#f8d7da",
-                  color: q.status === "pending" ? "#155724" : "#721c24",
-                  padding: "5px 10px",
-                  borderRadius: "6px",
-                  fontWeight: "bold"
-                }}
-              >
-                {q.status}
-              </span>
-            </p>
-
-
-            {q.status === "pending" && (
-
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-
-                <textarea
-                  placeholder="Write your reply..."
-                  value={replyText[q._id] || ""}
-                  onChange={(e) =>
-                    setReplyText({
-                      ...replyText,
-                      [q._id]: e.target.value
-                    })
-                  }
-                  style={{
-                    flex: 1,
-                    padding: "10px"
-                  }}
-                />
-
-                <button
-                  onClick={() => sendReply(q._id)}
-                  style={{
-                    padding: "10px 15px"
-                  }}
+        <div className="query-list">
+          {queries.map((q) => (
+            <div key={q._id} className="query-card">
+              <div className="query-card-header">
+                <h3>{q.title}</h3>
+                <span
+                  className={`status-badge ${
+                    q.status === "pending" ? "pending" : "solved"
+                  }`}
                 >
-                  Send
-                </button>
-
+                  {q.status === "pending" ? (
+                    <>
+                      <Clock size={14} /> Pending
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={14} /> Solved
+                    </>
+                  )}
+                </span>
               </div>
 
-            )}
+              <div className="query-meta">
+                <span>
+                  <User size={14} /> {q.student?.name || "Unknown"}
+                </span>
+                <span>
+                  <BookOpen size={14} /> {q.course?.title || "Unknown Course"}
+                </span>
+              </div>
 
-          </div>
+              <p className="query-topic">
+                <strong>Topic:</strong> {q.topic}
+              </p>
+              <p className="query-description">{q.description}</p>
 
-        ))
-
+              {q.status === "pending" ? (
+                <div className="reply-form">
+                  <textarea
+                    placeholder="Write your reply..."
+                    value={replyText[q._id] || ""}
+                    onChange={(e) =>
+                      setReplyText({
+                        ...replyText,
+                        [q._id]: e.target.value,
+                      })
+                    }
+                    rows="3"
+                  />
+                  <button
+                    className="common-btn"
+                    onClick={() => sendReply(q._id)}
+                  >
+                    Send Reply
+                  </button>
+                </div>
+              ) : (
+                <div className="query-reply">
+                  <h4>
+                    <MessageSquare size={16} /> Your Reply
+                  </h4>
+                  <p>{q.reply}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
-
     </div>
-
   );
 };
 

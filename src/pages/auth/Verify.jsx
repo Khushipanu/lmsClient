@@ -35,7 +35,7 @@ const Verify = () => {
              onChange={e=>setOtp(e.target.value)}
              required />
              <ReCAPTCHA
-               sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+               sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // fallback test key
                onChange={onChange}
   />
         {show && (

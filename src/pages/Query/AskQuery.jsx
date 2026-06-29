@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { server } from "../../main";
+import api from "../../api/axios";
 import { useParams } from "react-router-dom";
 import "./Query.css";
 
@@ -13,8 +12,6 @@ const AskQuery = () => {
     description: "",
     topic: ""
   });
-
-  const token = localStorage.getItem("token");
 
   const handleChange = (e) => {
     setFormData({
@@ -29,14 +26,9 @@ const AskQuery = () => {
 
     try {
 
-      const { data } = await axios.post(
-        `${server}/api/query/create/${courseId}`,
-        formData,
-        {
-          headers: {
-            token: token
-          }
-        }
+      const { data } = await api.post(
+        `/api/query/create/${courseId}`,
+        formData
       );
 
       alert(data.message);
