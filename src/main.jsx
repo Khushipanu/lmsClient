@@ -8,7 +8,7 @@ import { ThemeProvider } from './context/ThemeContext.jsx'
 
 // Backward-compatible server URL export (default matches Express server port 5000)
 export const server =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+  (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
