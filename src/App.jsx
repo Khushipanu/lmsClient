@@ -42,13 +42,15 @@ const App = () => {
 
           <Routes>
 
-            <Route path="/" element={<ProtectedRoute isAuth={isAuth}><Home /></ProtectedRoute>} />
+            <Route path="/" element={<Home />} />
 
-            <Route path="/about" element={<ProtectedRoute isAuth={isAuth}><About /></ProtectedRoute>} />
+            <Route path="/about" element={<About />} />
 
-            <Route path="/bot" element={<ProtectedRoute isAuth={isAuth}><Bot /></ProtectedRoute>} />
+            <Route path="/bot" element={<Bot />} />
 
-            <Route path="/courses" element={<ProtectedRoute isAuth={isAuth}><Courses /></ProtectedRoute>} />
+            <Route path="/courses" element={<Courses />} />
+
+            <Route path="/course/:id" element={<Coursedescription user={user} />} />
 
             <Route
               path="/login"
@@ -68,11 +70,6 @@ const App = () => {
             <Route
               path="/verify"
               element={isAuth ? <Navigate to="/" /> : <Verify />}
-            />
-
-            <Route
-              path="/course/:id"
-              element={<ProtectedRoute isAuth={isAuth}><Coursedescription user={user} /></ProtectedRoute>}
             />
 
             <Route
