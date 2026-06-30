@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { UserData } from "../../context/UserContext.jsx";
 import { Loader2 } from "lucide-react";
@@ -24,8 +24,12 @@ const AuthSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { fetchUser, setUser, setIsAuth } = UserData();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const token = searchParams.get("token");
     if (!token) {
       navigate("/login");
@@ -45,7 +49,8 @@ const AuthSuccess = () => {
     fetchUser().finally(() => {
       navigate("/");
     });
-  }, [searchParams, fetchUser, setUser, setIsAuth, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="auth-page">
