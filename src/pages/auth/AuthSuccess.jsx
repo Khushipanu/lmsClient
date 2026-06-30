@@ -4,10 +4,26 @@ import { UserData } from "../../context/UserContext.jsx";
 import { Loader2 } from "lucide-react";
 import "./auth.css";
 
+const decodeJwt = (token) => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+};
+
 const AuthSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { fetchUser } = UserData();
+  const { fetchUser, setUser, setIsAuth } = UserData();
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -17,10 +33,19 @@ const AuthSuccess = () => {
     }
 
     localStorage.setItem("token", token);
+
+    // Decode token and set basic auth state immediately
+    const payload = decodeJwt(token);
+    if (payload && payload._id) {
+      setUser({ _id: payload._id, role: payload.role || "user" });
+      setIsAuth(true);
+    }
+
+    // Fetch full profile in the background, then go home
     fetchUser().finally(() => {
       navigate("/");
     });
-  }, [searchParams, fetchUser, navigate]);
+  }, [searchParams, fetchUser, setUser, setIsAuth, navigate]);
 
   return (
     <div className="auth-page">
