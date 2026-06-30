@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './auth.css'
 import { Link, useNavigate } from 'react-router-dom'
+import { Mail, Lock, LogIn } from 'lucide-react'
 import { UserData } from '../../context/UserContext.jsx'
 import { CourseData } from '../../context/courseContext.jsx'
 
@@ -19,39 +20,52 @@ const Login = () => {
 
   return (
     <div className="auth-page">
+      <div className="auth-shape shape-1" />
+      <div className="auth-shape shape-2" />
+
       <div className="auth-form">
+        <div className="auth-icon">
+          <LogIn size={28} />
+        </div>
+
         <h2>Welcome Back</h2>
-        <p className="subtitle">Login to continue learning</p>
+        <p className="subtitle">Sign in to access your courses</p>
+
         <form onSubmit={submitHandler}>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="input-group">
+            <Mail size={18} className="input-icon" />
+            <input
+              type="email"
+              id="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="input-group">
+            <Lock size={18} className="input-icon" />
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
-          <button disabled={btnLoading} type="submit">
-            {btnLoading ? "Please wait" : "Login"}
+          <div className="auth-options">
+            <Link to="/forgot">Forgot password?</Link>
+          </div>
+
+          <button disabled={btnLoading} type="submit" className="submit-btn">
+            {btnLoading ? "Please wait..." : "Sign In"}
           </button>
         </form>
 
-        <div className="auth-links">
-          <p>Don't have an account? <Link to='/register'>Register</Link></p>
-          <p><Link to="/forgot">Forgot password?</Link></p>
-        </div>
-
-        <div className="divider"><span>OR</span></div>
+        <div className="divider"><span>or continue with</span></div>
 
         <button
           type="button"
@@ -65,8 +79,12 @@ const Login = () => {
             alt="google"
             className="google-icon"
           />
-          <span>Login with Google</span>
+          <span>Google</span>
         </button>
+
+        <div className="auth-footer">
+          Don't have an account? <Link to='/register'>Create one</Link>
+        </div>
       </div>
     </div>
   )
