@@ -46,32 +46,15 @@ const CourseCard = ({ course, showAdminActions = true }) => {
         <p>Price - ₹{course.price}</p>
 
         {/* ------------------- MAIN BUTTON LOGIC ------------------- */}
-        {!isAuth ? (
-          // ❌ Not logged in
-          <button onClick={() => navigate(`/login`)} className="common-btn">
+        {!isAuth || !showAdminActions ? (
+          // ❌ Public / courses listing: always show Get Started
+          <button onClick={() => navigate(isAuth ? `/course/${course._id}` : `/login`)} className="common-btn">
             Get Started
           </button>
         ) : (
           <>
-            {/* ✅ If NOT admin OR public listing */}
-            {user.role !== "admin" || !showAdminActions ? (
-              user.subscription?.includes(course._id) ? (
-                <button
-                  onClick={() => navigate(`/course/study/${course._id}`)}
-                  className="common-btn"
-                >
-                  Study
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate(`/course/${course._id}`)}
-                  className="common-btn"
-                >
-                  Get Started
-                </button>
-              )
-            ) : (
-              // ✅ If admin in admin view
+            {/* ✅ If admin in admin view */}
+            {user.role === "admin" ? (
               <>
                 {isCreatedByAdmin ? (
                   <>
@@ -100,6 +83,23 @@ const CourseCard = ({ course, showAdminActions = true }) => {
                   </button>
                 )}
               </>
+            ) : (
+              // ✅ Normal logged-in user in admin/private view
+              user.subscription?.includes(course._id) ? (
+                <button
+                  onClick={() => navigate(`/course/study/${course._id}`)}
+                  className="common-btn"
+                >
+                  Study
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate(`/course/${course._id}`)}
+                  className="common-btn"
+                >
+                  Get Started
+                </button>
+              )
             )}
           </>
         )}
