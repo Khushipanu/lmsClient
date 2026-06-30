@@ -44,13 +44,16 @@ const App = () => {
 
             <Route path="/" element={<Home />} />
 
-            <Route path="/about" element={<About />} />
+            <Route path="/about" element={<ProtectedRoute isAuth={isAuth}><About /></ProtectedRoute>} />
 
-            <Route path="/bot" element={<Bot />} />
+            <Route path="/bot" element={<ProtectedRoute isAuth={isAuth}><Bot /></ProtectedRoute>} />
 
-            <Route path="/courses" element={<Courses />} />
+            <Route path="/courses" element={<ProtectedRoute isAuth={isAuth}><Courses /></ProtectedRoute>} />
 
-            <Route path="/course/:id" element={<Coursedescription user={user} />} />
+            <Route
+              path="/course/:id"
+              element={<ProtectedRoute isAuth={isAuth}><Coursedescription user={user} /></ProtectedRoute>}
+            />
 
             <Route
               path="/login"

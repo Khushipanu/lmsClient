@@ -18,9 +18,13 @@ const Header = ({ isAuth }) => {
 
       <div className={`nav-links ${menuOpen ? "open" : ""}`}>
         <NavLink to="/" onClick={() => setMenuOpen(false)}>Home</NavLink>
-        <NavLink to="/courses" onClick={() => setMenuOpen(false)}>Courses</NavLink>
-        <NavLink to="/about" onClick={() => setMenuOpen(false)}>About</NavLink>
-        <NavLink to="/bot" onClick={() => setMenuOpen(false)}>AI Bot</NavLink>
+        {isAuth && (
+          <>
+            <NavLink to="/courses" onClick={() => setMenuOpen(false)}>Courses</NavLink>
+            <NavLink to="/about" onClick={() => setMenuOpen(false)}>About</NavLink>
+            <NavLink to="/bot" onClick={() => setMenuOpen(false)}>AI Bot</NavLink>
+          </>
+        )}
       </div>
 
       <div className="nav-action">
