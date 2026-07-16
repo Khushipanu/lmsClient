@@ -28,6 +28,12 @@ export const UserContextProvider = ({ children }) => {
       if (data.activationToken) {
         localStorage.setItem("activationToken", data.activationToken);
         toast.success(data.message || "Registration successful! Please check your email for OTP.");
+        // TEMPORARY: while email delivery is unreliable, the server
+        // includes the OTP directly so signup can still be completed.
+        // Remove once real email delivery is confirmed working.
+        if (data.otp) {
+          toast(`Your OTP is: ${data.otp}`, { duration: 15000, icon: "🔑" });
+        }
         navigate("/verify");
       } else {
         throw new Error("No activation token received from server");
