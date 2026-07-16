@@ -60,4 +60,4 @@ const Account = ({user}) => {
   )
 }
 
-export default Account
+export default Account;
