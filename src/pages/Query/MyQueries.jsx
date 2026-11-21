@@ -1,92 +1,82 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { MessageCircleQuestion } from "lucide-react";
 import api from "../../api/axios";
-import Loading from "../../components/loading/Loading";
-import { HelpCircle, MessageSquare, Clock, CheckCircle } from "lucide-react";
-import "./Query.css";
+import { EmptyState, PageLoader } from "../../components/ui";
+import QueryCard from "./QueryCard";
 
 const MyQueries = () => {
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const fetchQueries = async () => {
-    try {
-      const { data } = await api.get("/api/query/my");
-      setQueries(data.queries);
-    } catch (error) {
-      console.log("Error fetching queries:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [tab, setTab] = useState("all");
 
   useEffect(() => {
-    fetchQueries();
+    api
+      .get("/api/query/my")
+      .then(({ data }) => setQueries(data.queries || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="query-page">
-        <Loading />
-      </div>
-    );
-  }
+  const counts = useMemo(
+    () => ({
+      all: queries.length,
+      pending: queries.filter((q) => q.status !== "solved").length,
+      solved: queries.filter((q) => q.status === "solved").length,
+    }),
+    [queries]
+  );
+  const shown = queries.filter((q) => tab === "all" || (tab === "solved" ? q.status === "solved" : q.status !== "solved"));
+
+  if (loading) return <PageLoader label="Loading your doubts…" />;
 
   return (
-    <div className="query-page">
-      <div className="query-header">
-        <HelpCircle size={28} />
-        <h2>My Doubts</h2>
+    <div className="page">
+      <div className="container narrow">
+        <div className="page-header">
+          <div>
+            <span className="eyebrow">Support</span>
+            <h1>My doubts</h1>
+            <p>Questions you've asked your instructors.</p>
+          </div>
+        </div>
+
+        {queries.length > 0 && (
+          <div className="chips" style={{ marginBottom: 20 }}>
+            {[
+              ["all", "All"],
+              ["pending", "Pending"],
+              ["solved", "Answered"],
+            ].map(([k, label]) => (
+              <button key={k} className={`chip ${tab === k ? "active" : ""}`} onClick={() => setTab(k)}>
+                {label}
+                <span className="count">{counts[k]}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {shown.length ? (
+          <div className="stack">
+            {shown.map((q) => (
+              <QueryCard key={q._id} q={{ ...q, student: null }}>
+                {!q.reply && <p className="query-waiting">Waiting for {q.instructor?.name || "the instructor"} to reply…</p>}
+              </QueryCard>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={MessageCircleQuestion}
+            title={queries.length ? "Nothing here" : "No doubts yet"}
+            text="Open any enrolled course and use “Ask the instructor” when you're stuck."
+            action={
+              <Link to="/dashboard" className="btn btn-primary">
+                Go to my courses
+              </Link>
+            }
+          />
+        )}
       </div>
-
-      {queries.length === 0 ? (
-        <div className="empty-state">
-          <MessageSquare size={48} />
-          <p>No doubts asked yet</p>
-        </div>
-      ) : (
-        <div className="query-list">
-          {queries.map((q) => (
-            <div key={q._id} className="query-card">
-              <div className="query-card-header">
-                <h3>{q.title}</h3>
-                <span
-                  className={`status-badge ${
-                    q.status === "pending" ? "pending" : "solved"
-                  }`}
-                >
-                  {q.status === "pending" ? (
-                    <>
-                      <Clock size={14} /> Pending
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle size={14} /> Solved
-                    </>
-                  )}
-                </span>
-              </div>
-
-              <p className="query-topic">
-                <strong>Topic:</strong> {q.topic}
-              </p>
-              <p className="query-description">{q.description}</p>
-
-              {q.reply ? (
-                <div className="query-reply">
-                  <h4>
-                    <MessageSquare size={16} /> Instructor Reply
-                  </h4>
-                  <p>{q.reply}</p>
-                </div>
-              ) : (
-                <p className="query-waiting">
-                  <Clock size={14} /> Waiting for instructor reply...
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

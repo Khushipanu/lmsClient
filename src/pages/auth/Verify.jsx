@@ -1,57 +1,76 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
-import { UserData } from '../../context/UserContext';
-import ReCAPTCHA from "react-google-recaptcha";
-
+import { useState } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { MailCheck, KeyRound } from "lucide-react";
+import { UserData } from "../../context/UserContext";
+import { SubmitButton } from "../../components/ui";
+import AuthLayout from "./AuthLayout";
 
 const Verify = () => {
-  const [otp,setOtp]=useState("")
-  const {btnLoading,verifyOtp}=UserData()
-  const [show,setShow]=useState(false)
-  const navigate=useNavigate()
+  const navigate = useNavigate();
+  const { btnLoading, verifyOtp } = UserData();
+  const [otp, setOtp] = useState("");
+  // Read once on mount — verifyOtp clears these on success, which must not
+  // bounce the user back to /register before we navigate to /login.
+  const [{ email, fallbackOtp, hasToken }] = useState(() => ({
+    email: sessionStorage.getItem("pendingEmail"),
+    fallbackOtp: sessionStorage.getItem("fallbackOtp"),
+    hasToken: Boolean(sessionStorage.getItem("activationToken")),
+  }));
 
-  function onChange(value) {
-  console.log("Captcha value:", value);
-  setShow(true)
-}
+  if (!hasToken) return <Navigate to="/register" replace />;
 
-
-  const submitHandler=async(e)=>{
+  const submitHandler = async (e) => {
     e.preventDefault();
-    await verifyOtp(Number(otp),navigate)
-    
-    
-  }
+    if (await verifyOtp(otp)) navigate("/login", { replace: true });
+  };
+
   return (
-    <div className="auth-page">
-        <div className="auth-form">
-            <h2>Verify Account</h2>
+    <AuthLayout>
+      <div className="auth-icon">
+        <MailCheck size={24} />
+      </div>
+      <h1>Check your email</h1>
+      <p className="auth-sub">
+        {fallbackOtp ? "Enter the 6-digit code for " : "We sent a 6-digit code to "}
+        <strong style={{ color: "var(--text)" }}>{email || "your email"}</strong>. It expires in 15 minutes.
+      </p>
 
-            <form onSubmit={submitHandler}>
-
-            <label htmlFor="otp"> Otp </label> 
-            <input type="number"  
-             value={otp}
-             onChange={e=>setOtp(e.target.value)}
-             required />
-             <ReCAPTCHA
-               sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"} // fallback test key
-               onChange={onChange}
-  />
-        {show && (
-            <button
-             disabled={btnLoading} 
-             type="submit" 
-             className="common-btn" >
-              {btnLoading?"pls wait...":"verify"} 
-               </button>)}
-             </form>
-             <p>
-                Go to <Link to='/login'>Login  </Link> page
-             </p>
+      {fallbackOtp && (
+        <div className="alert alert-warning" style={{ marginBottom: 18 }}>
+          <KeyRound size={18} />
+          <span>
+            Email delivery is unavailable right now. Your code is <strong>{fallbackOtp}</strong>
+          </span>
         </div>
-    </div>
-  )
-}
+      )}
+
+      <form onSubmit={submitHandler}>
+        <div className="field">
+          <label htmlFor="otp">Verification code</label>
+          <input
+            id="otp"
+            className="input otp-input"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="••••••"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            autoFocus
+            required
+          />
+          <span className="field-hint">Can't find it? Check your spam or promotions folder.</span>
+        </div>
+        <SubmitButton loading={btnLoading} disabled={btnLoading || otp.length !== 6}>
+          {btnLoading ? "Verifying…" : "Verify & continue"}
+        </SubmitButton>
+      </form>
+
+      <p className="auth-foot">
+        Wrong email or no code? <Link to="/register">Start over</Link>
+      </p>
+    </AuthLayout>
+  );
+};
 
 export default Verify;

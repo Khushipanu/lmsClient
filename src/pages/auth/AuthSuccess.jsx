@@ -1,66 +1,40 @@
-import React, { useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { UserData } from "../../context/UserContext.jsx";
-import { Loader2 } from "lucide-react";
-import "./auth.css";
+import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { UserData } from "../../context/UserContext";
+import { PageLoader } from "../../components/ui";
 
-const decodeJwt = (token) => {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-};
-
+// Google OAuth lands here with #token=... (older server builds used ?token=...).
 const AuthSuccess = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { fetchUser, setUser, setIsAuth } = UserData();
-  const hasRun = useRef(false);
+  const { loginWithToken } = UserData();
+  const ran = useRef(false);
 
   useEffect(() => {
-    if (hasRun.current) return;
-    hasRun.current = true;
+    if (ran.current) return;
+    ran.current = true;
 
-    const token = searchParams.get("token");
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const query = new URLSearchParams(window.location.search);
+    const token = hash.get("token") || query.get("token");
+    window.history.replaceState(null, "", "/auth-success"); // drop the token from the URL bar
+
     if (!token) {
-      navigate("/login");
+      navigate("/login?err=google_failed", { replace: true });
       return;
     }
 
-    localStorage.setItem("token", token);
-
-    // Decode token and set basic auth state immediately
-    const payload = decodeJwt(token);
-    if (payload && payload._id) {
-      setUser({ _id: payload._id, role: payload.role || "user" });
-      setIsAuth(true);
-    }
-
-    // Fetch full profile in the background, then go home
-    fetchUser().finally(() => {
-      navigate("/");
+    loginWithToken(token).then((user) => {
+      if (user) {
+        toast.success(`Welcome, ${user.name?.split(" ")[0] || "there"}!`);
+        navigate(user.role === "admin" ? "/admin/dashboard" : "/dashboard", { replace: true });
+      } else {
+        navigate("/login?err=google_failed", { replace: true });
+      }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loginWithToken, navigate]);
 
-  return (
-    <div className="auth-page">
-      <div className="auth-form" style={{ textAlign: "center" }}>
-        <Loader2 className="spin-icon" size={40} />
-        <h2 className="mt-2">Signing you in...</h2>
-        <p>Please wait while we complete the Google login.</p>
-      </div>
-    </div>
-  );
+  return <PageLoader label="Signing you in with Google…" />;
 };
 
 export default AuthSuccess;

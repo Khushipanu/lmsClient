@@ -1,137 +1,107 @@
-import React, { useEffect, useState } from "react";
-import api from "../../api/axios";
-import Loading from "../../components/loading/Loading";
-import { MessageSquare, User, BookOpen, CheckCircle, Clock } from "lucide-react";
-import "./Query.css";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { MessageCircleQuestion, Send } from "lucide-react";
+import api, { getErrorMessage } from "../../api/axios";
+import AdminLayout from "../../Admin/Utils/Layout";
+import { EmptyState, PageLoader, Spinner } from "../../components/ui";
+import QueryCard from "./QueryCard";
 
-const InstructorQueries = () => {
+const InstructorQuery = () => {
   const [queries, setQueries] = useState([]);
-  const [replyText, setReplyText] = useState({});
   const [loading, setLoading] = useState(true);
-
-  const fetchQueries = async () => {
-    try {
-      const { data } = await api.get("/api/query/instructor");
-      setQueries(data.queries);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [replies, setReplies] = useState({});
+  const [sending, setSending] = useState(null);
+  const [tab, setTab] = useState("pending");
 
   useEffect(() => {
-    fetchQueries();
+    api
+      .get("/api/query/instructor")
+      .then(({ data }) => setQueries(data.queries || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const sendReply = async (id) => {
-    const reply = replyText[id];
-    if (!reply?.trim()) return;
-
-    setReplyText({ ...replyText, [id]: "" });
-
+    const reply = replies[id]?.trim();
+    if (!reply) return;
+    setSending(id);
     try {
-      await api.put(`/api/query/status/${id}`, {
-        status: "solved",
-        reply: reply,
-      });
-      fetchQueries();
-    } catch (error) {
-      console.log(error);
+      const { data } = await api.put(`/api/query/status/${id}`, { status: "solved", reply });
+      setQueries((qs) => qs.map((q) => (q._id === id ? { ...q, ...data.query, student: q.student, course: q.course } : q)));
+      setReplies((r) => ({ ...r, [id]: "" }));
+      toast.success("Reply sent");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setSending(null);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="query-page">
-        <Loading />
-      </div>
-    );
-  }
+  const counts = useMemo(
+    () => ({
+      pending: queries.filter((q) => q.status !== "solved").length,
+      solved: queries.filter((q) => q.status === "solved").length,
+      all: queries.length,
+    }),
+    [queries]
+  );
+  const shown = queries.filter((q) => tab === "all" || (tab === "solved" ? q.status === "solved" : q.status !== "solved"));
 
   return (
-    <div className="query-page">
-      <div className="query-header">
-        <MessageSquare size={28} />
-        <h2>Students' Doubts</h2>
-      </div>
-
-      {queries.length === 0 ? (
-        <div className="empty-state">
-          <MessageSquare size={48} />
-          <p>No doubts from students yet</p>
-        </div>
+    <AdminLayout title="Student doubts" subtitle="Questions students asked about your courses.">
+      {loading ? (
+        <PageLoader />
       ) : (
-        <div className="query-list">
-          {queries.map((q) => (
-            <div key={q._id} className="query-card">
-              <div className="query-card-header">
-                <h3>{q.title}</h3>
-                <span
-                  className={`status-badge ${
-                    q.status === "pending" ? "pending" : "solved"
-                  }`}
-                >
-                  {q.status === "pending" ? (
-                    <>
-                      <Clock size={14} /> Pending
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle size={14} /> Solved
-                    </>
+        <>
+          <div className="chips" style={{ marginBottom: 20 }}>
+            {[
+              ["pending", "Pending"],
+              ["solved", "Answered"],
+              ["all", "All"],
+            ].map(([k, label]) => (
+              <button key={k} className={`chip ${tab === k ? "active" : ""}`} onClick={() => setTab(k)}>
+                {label}
+                <span className="count">{counts[k]}</span>
+              </button>
+            ))}
+          </div>
+
+          {shown.length ? (
+            <div className="stack">
+              {shown.map((q) => (
+                <QueryCard key={q._id} q={q} replyLabel="Your reply">
+                  {q.status !== "solved" && (
+                    <div className="reply-box">
+                      <textarea
+                        className="textarea"
+                        rows={3}
+                        placeholder="Write a helpful reply…"
+                        value={replies[q._id] || ""}
+                        onChange={(e) => setReplies((r) => ({ ...r, [q._id]: e.target.value }))}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => sendReply(q._id)}
+                        disabled={!replies[q._id]?.trim() || sending === q._id}
+                      >
+                        {sending === q._id ? <Spinner small /> : <Send size={16} />} Send reply
+                      </button>
+                    </div>
                   )}
-                </span>
-              </div>
-
-              <div className="query-meta">
-                <span>
-                  <User size={14} /> {q.student?.name || "Unknown"}
-                </span>
-                <span>
-                  <BookOpen size={14} /> {q.course?.title || "Unknown Course"}
-                </span>
-              </div>
-
-              <p className="query-topic">
-                <strong>Topic:</strong> {q.topic}
-              </p>
-              <p className="query-description">{q.description}</p>
-
-              {q.status === "pending" ? (
-                <div className="reply-form">
-                  <textarea
-                    placeholder="Write your reply..."
-                    value={replyText[q._id] || ""}
-                    onChange={(e) =>
-                      setReplyText({
-                        ...replyText,
-                        [q._id]: e.target.value,
-                      })
-                    }
-                    rows="3"
-                  />
-                  <button
-                    className="common-btn"
-                    onClick={() => sendReply(q._id)}
-                  >
-                    Send Reply
-                  </button>
-                </div>
-              ) : (
-                <div className="query-reply">
-                  <h4>
-                    <MessageSquare size={16} /> Your Reply
-                  </h4>
-                  <p>{q.reply}</p>
-                </div>
-              )}
+                </QueryCard>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : (
+            <EmptyState
+              icon={MessageCircleQuestion}
+              title={tab === "pending" ? "You're all caught up" : "No doubts here"}
+              text={tab === "pending" ? "No pending questions from students right now." : "Student questions will show up here."}
+            />
+          )}
+        </>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 
-export default InstructorQueries;
+export default InstructorQuery;

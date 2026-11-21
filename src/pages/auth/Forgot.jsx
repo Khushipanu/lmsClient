@@ -1,113 +1,69 @@
-// import React from 'react'
-// import './auth.css'
-// import { useState } from 'react'
-// import { useNavigate } from 'react-router-dom';
-// import toast from 'react-hot-toast';
-// import axios from 'axios';
-// import { server } from '../../main';
-
-
-// const Forgot = () => {
-//     const[email,setEmail]=useState("");
-//     const [btnLoading,setBtnLoading]=useState(false)
-//     const navigate=useNavigate()
-
-//     const handleSubmit=async(e)=>{
-//         e.preventDefault();
-//         setBtnLoading(true)
-//         try{
-//             const {data}=await axios.post(`${server}/api/user/forgot`,{email})
-//             toast.success(data.message)
-//             navigate('/login')
-//             setBtnLoading(false)
-
-//         }catch(err){
-//             toast.error(err.response.data.message);
-//             setBtnLoading(false)
-
-//         }
-
-//     }
-//   return (
-//     <div className="auth-page" >
-//         <div className="auth-form">
-//             <h2>Forgot Password</h2>
-//             <form onSubmit={handleSubmit}>
-//                 <label htmlFor="text">Enter Email</label>
-//                 <input type="email" value={email} 
-//                 onChange={(e)=>setEmail(e.target.value)}
-//                 required
-//                 />
-//                 <button disabled={btnLoading} 
-//                 className="common-btn" >
-                    
-//                     {btnLoading? "Pls wait" : "Forgot password"}
-//                     </button>
-//             </form>
-
-//         </div>
-
-
-      
-//     </div>
-//   )
-// }
-
-// export default Forgot;
-
-import React, { useState } from 'react';
-import './auth.css';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import api from '../../api/axios';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Mail, KeyRound, CheckCircle2 } from "lucide-react";
+import api, { getErrorMessage } from "../../api/axios";
+import { SubmitButton } from "../../components/ui";
+import AuthLayout from "./AuthLayout";
 
 const Forgot = () => {
   const [email, setEmail] = useState("");
-  const [btnLoading, setBtnLoading] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setBtnLoading(true);
-
+    setLoading(true);
     try {
       const { data } = await api.post("/api/user/forgot", { email });
       toast.success(data.message);
-      navigate('/login');
+      setSent(true);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Something went wrong");
+      toast.error(getErrorMessage(err));
     } finally {
-      setBtnLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-form">
-        <h2>Forgot Password</h2>
+    <AuthLayout>
+      <div className="auth-icon">{sent ? <CheckCircle2 size={24} /> : <KeyRound size={24} />}</div>
+      <h1>{sent ? "Check your inbox" : "Forgot password?"}</h1>
+      <p className="auth-sub">
+        {sent
+          ? `If an account exists for ${email}, a reset link is on its way. It expires in 15 minutes.`
+          : "Enter your email and we'll send you a link to reset your password."}
+      </p>
 
+      {!sent ? (
         <form onSubmit={handleSubmit}>
-          {/* ✅ Fixed label + input connection */}
-          <label htmlFor="email">Enter Email</label>
-
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-
-          <button
-            disabled={btnLoading}
-            className="common-btn"
-          >
-            {btnLoading ? "Please wait..." : "Forgot Password"}
-          </button>
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <div className="input-icon">
+              <Mail size={18} />
+              <input
+                id="email"
+                type="email"
+                className="input"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <SubmitButton loading={loading}>{loading ? "Sending…" : "Send reset link"}</SubmitButton>
         </form>
+      ) : (
+        <button className="btn btn-block btn-lg" onClick={() => setSent(false)}>
+          Use a different email
+        </button>
+      )}
 
-      </div>
-    </div>
+      <p className="auth-foot">
+        Remembered it? <Link to="/login">Back to log in</Link>
+      </p>
+    </AuthLayout>
   );
 };
 

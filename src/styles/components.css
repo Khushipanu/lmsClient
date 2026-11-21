@@ -1,0 +1,562 @@
+/* =========================================================
+   Logo
+   ========================================================= */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   Header
+   ========================================================= */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 100%;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 14px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav-link.active {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.nav-mobile-auth {
+  display: none;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.header-auth {
+  display: flex;
+  gap: 6px;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 10px 0 5px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.user-trigger:hover {
+  border-color: var(--border-strong);
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 260px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: pop 0.15s var(--ease);
+}
+
+.dropdown-head {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-head span {
+  font-size: 13px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.dropdown-item.danger {
+  color: var(--danger);
+}
+
+@media (max-width: 900px) {
+  .menu-toggle {
+    display: inline-grid;
+  }
+  .header-auth,
+  .user-trigger-name {
+    display: none;
+  }
+  .nav {
+    position: fixed;
+    top: var(--header-h);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 12px 16px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s var(--ease);
+  }
+  .nav.open {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .nav-link {
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+  .nav-mobile-auth {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+  }
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.site-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  padding-top: 56px;
+  padding-bottom: 40px;
+}
+
+.footer-brand p {
+  margin-top: 14px;
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.footer-grid h4 {
+  margin-bottom: 14px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.footer-grid a:not(.logo) {
+  display: block;
+  padding: 4px 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.footer-grid a:not(.logo):hover {
+  color: var(--primary-text);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  padding-bottom: 28px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================================
+   Course card
+   ========================================================= */
+.course-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s;
+}
+
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
+}
+
+.course-card-link {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  color: inherit;
+}
+
+.course-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.course-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s var(--ease);
+}
+
+.course-card:hover .course-thumb img {
+  transform: scale(1.04);
+}
+
+.course-cat {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #191a17;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+}
+
+.course-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 18px 18px;
+}
+
+.course-body h3 {
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.course-instructor {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.course-meta {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.course-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.course-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.course-price {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.course-price.free {
+  color: var(--success);
+}
+
+.course-cta {
+  color: var(--primary-text);
+  font-weight: 600;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s var(--ease);
+}
+
+.course-card:hover .course-cta {
+  opacity: 1;
+  transform: none;
+}
+
+.course-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 18px 18px;
+}
+
+.course-card-actions .btn {
+  flex: 1;
+}
+
+@media (hover: none) {
+  .course-cta {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* =========================================================
+   Auth layout
+   ========================================================= */
+.auth-shell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - var(--header-h));
+}
+
+.auth-aside {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px;
+  background: #0b3b37;
+  color: #e6f4f1;
+  overflow: hidden;
+}
+
+.auth-aside::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 400px at 100% 0%, rgba(45, 212, 191, 0.35), transparent 60%),
+    radial-gradient(500px 300px at 0% 100%, rgba(245, 158, 11, 0.22), transparent 60%);
+}
+
+.auth-aside > * {
+  position: relative;
+}
+
+.auth-aside h2 {
+  color: #fff;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  max-width: 440px;
+}
+
+.auth-aside p {
+  margin-top: 14px;
+  max-width: 420px;
+  color: rgba(230, 244, 241, 0.8);
+  font-size: 16px;
+}
+
+.auth-points {
+  display: grid;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.auth-points div {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-weight: 500;
+}
+
+.auth-points svg {
+  flex-shrink: 0;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #5eead4;
+}
+
+.auth-quote {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+}
+
+.auth-quote strong {
+  display: block;
+  margin-top: 10px;
+  color: #fff;
+}
+
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-card .auth-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--primary-text);
+}
+
+.auth-card h1 {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.auth-card .auth-sub {
+  margin: 8px 0 28px;
+  color: var(--muted);
+}
+
+.auth-card form {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-foot {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.auth-foot a,
+.link {
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.google-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.otp-input {
+  height: 60px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  padding-left: 0.5em;
+}
+
+@media (max-width: 900px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+  .auth-aside {
+    display: none;
+  }
+}

@@ -1,170 +1,98 @@
-import React, { useEffect, useState } from 'react'
-import Layout from '../Utils/Layout'
-import { useNavigate } from 'react-router-dom'
-import { CourseData } from '../../context/courseContext';
-import CourseCard from '../../components/coursescard/CourseCard';
-import "./AdminCourses.css";
-import toast from 'react-hot-toast';
-import api from '../../api/axios';
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Plus, Pencil, Trash2, ListVideo, BookOpen } from "lucide-react";
+import api, { getErrorMessage } from "../../api/axios";
+import AdminLayout from "../Utils/Layout";
+import CourseForm from "./CourseForm";
+import CourseCard, { CourseCardSkeleton } from "../../components/CourseCard";
+import { EmptyState } from "../../components/ui";
+import { CourseData } from "../../context/courseContext";
 
-const categories=[
-    "Web Development",
-    "App Development",
-    "Game Development",
-    "Data Science",
-    "Artificial Intelligence"
-]
+const AdminCourses = () => {
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const { mycourse, myLoading, fetchMyCourse, fetchCourses } = CourseData();
+  const [editing, setEditing] = useState(null);
+  const creating = params.get("new") === "1";
 
-const AdminCourses = ({user}) => {
-    const navigate=useNavigate();
-    const {courses,fetchCourses}=CourseData()
-    
-    const [title,setTitle]=useState("")
-    const [description,setDescription]=useState("")
-    const [category,setCategory]=useState("")
-    const [price,setPrice]=useState("")
-    const [duration,setDuration]=useState("")
-    const [image,setImage]=useState("")
-    const [imagePrev,setImagePrev]=useState("")
-    const [btnLoading,setBtnLoading]=useState(false)
-    const [showForm,setShowForm]=useState(false)
-    
-    // Double-check admin role - redirect if not admin
-    useEffect(() => {
-        if (!user || user.role !== "admin") {
-            navigate("/");
-        }
-    }, [user, navigate]);
-    
-    if (!user || user.role !== "admin") {
-        return null; // Don't render anything while redirecting
+  const refresh = () => Promise.all([fetchMyCourse(), fetchCourses()]);
+
+  const remove = async (course) => {
+    if (!confirm(`Delete “${course.title}” and all its lectures? This can't be undone.`)) return;
+    try {
+      const { data } = await api.delete(`/api/course/${course._id}`);
+      toast.success(data.message);
+      refresh();
+    } catch (err) {
+      toast.error(getErrorMessage(err));
     }
-    
-    
-        const changeImageHandler=(e)=>{
-        const file=e.target.files[0];
-        const reader=new FileReader()
-        reader.readAsDataURL(file);
-        reader.onloadend=()=>{
-            setImagePrev(reader.result);
-            setImage(file)
-        }
-    };
-    
-
-    const submitHandler=async(e)=>{
-        e.preventDefault();
-        setBtnLoading(true);
-
-        const myForm= new FormData()
-        myForm.append("title",title);
-        myForm.append("category",category);
-        myForm.append("price",price);
-        myForm.append("duration",duration);
-        myForm.append("description", description);
-        myForm.append("createdBy",user._id);
-        myForm.append("file",image);
-
-        try{
-            const {data}=await api.post("/api/course/new",myForm)
-            toast.success(data.message)
-            setBtnLoading(false)
-            await fetchCourses()
-            setImage("")
-            setTitle("")
-            setDescription("")
-            setDuration("")
-            setImagePrev("")
-            setPrice("")
-            setCategory("")
-
-        }catch(err){
-            toast.error(err.response?.data?.message);
-            setBtnLoading(false)
-        }
-    }
-
-    const myCourses = courses
-        ? courses.filter(course => course.createdBy === user._id || course.createdBy === user.name)
-        : [];
+  };
 
   return (
-   <Layout>
-     <div className="admin-courses">
-        <div className="left">
-            <h1>My Courses</h1>
-            <div className="dashboard-content">
-                {
-                    myCourses.length > 0
-                    ? myCourses.map(course => <CourseCard key={course._id} course={course} />)
-                    : <p>No courses yet</p>
-                }
-            </div>
+    <AdminLayout
+      title="My courses"
+      subtitle="Create courses, upload lectures and keep your content up to date."
+      actions={
+        <button className="btn btn-primary" onClick={() => setParams({ new: "1" })}>
+          <Plus size={17} /> New course
+        </button>
+      }
+    >
+      {myLoading && !mycourse.length ? (
+        <div className="grid grid-courses">
+          {[1, 2, 3].map((i) => (
+            <CourseCardSkeleton key={i} />
+          ))}
         </div>
-        <div className="right">
-            <button
-                type="button"
-                className="common-btn toggle-form-btn"
-                onClick={() => setShowForm((prev) => !prev)}
-            >
-                {showForm ? "Close" : "Add Course"}
+      ) : mycourse.length ? (
+        <div className="grid grid-courses">
+          {mycourse.map((c) => (
+            <CourseCard
+              key={c._id}
+              course={c}
+              to={`/course/${c._id}`}
+              footer={
+                <>
+                  <button className="btn btn-sm btn-soft" onClick={() => navigate(`/lecture/${c._id}`)}>
+                    <ListVideo size={15} /> Lectures
+                  </button>
+                  <button className="btn btn-sm" onClick={() => setEditing(c)} aria-label="Edit course">
+                    <Pencil size={15} />
+                  </button>
+                  <button className="btn btn-sm btn-danger" style={{ flex: "none" }} onClick={() => remove(c)} aria-label="Delete course">
+                    <Trash2 size={15} />
+                  </button>
+                </>
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={BookOpen}
+          title="Create your first course"
+          text="Add a title, description and cover image — then upload lectures to it."
+          action={
+            <button className="btn btn-primary" onClick={() => setParams({ new: "1" })}>
+              <Plus size={17} /> New course
             </button>
+          }
+        />
+      )}
 
-            {showForm && (
-                <div className="add-course">
-                    <div className="course-form">
-                        <h2>Add Course</h2>
-                        <form onSubmit={submitHandler} >
-                            <label htmlFor="text">Title</label>
-                            <input type="text"
-                             value={title} 
-                             onChange={(e)=>setTitle(e.target.value)} 
-                             required />
-
-                             <label htmlFor="text">Description</label>
-                            <input type="text"
-                             value={description} 
-                             onChange={(e)=>setDescription(e.target.value)} 
-                             required />
-
-                             <label htmlFor="text">Price</label>
-                            <input type="number"
-                             value={price} 
-                             onChange={(e)=>setPrice(e.target.value)} 
-                             required />
-
-
-                             <select value={category} 
-                             onChange={(e)=>setCategory(e.target.value)}>
-                                <option value={""}> Select Category </option>
-                                {
-                                    categories.map((e)=> (
-                                        <option value={e} key={e}> {e} </option>
-                                    ))
-                                }
-                             </select>
-
-                            <label htmlFor="text">Duration</label>
-
-                            <input type="number"
-                             value={duration} 
-                             onChange={(e)=>setDuration(e.target.value)} 
-                             required /> 
-
-                             <input type="file" required onChange={changeImageHandler} />
-                             {imagePrev && <img src={imagePrev} alt="preview" width={300}/> }
-                             <button type="submit" disabled={btnLoading} className="common-btn" >
-                                {btnLoading?"Pls wait" : "Add"}
-                             </button>
-
-                        </form>
-                    </div>
-                </div>
-            )}
-        </div>
-     </div>
-   </Layout>
-  )
-}
+      {(creating || editing) && (
+        <CourseForm
+          course={editing}
+          onClose={() => {
+            setEditing(null);
+            if (creating) setParams({}, { replace: true });
+          }}
+          onSaved={refresh}
+        />
+      )}
+    </AdminLayout>
+  );
+};
 
 export default AdminCourses;

@@ -1,53 +1,60 @@
+import { Link } from "react-router-dom";
+import { Target, Heart, Rocket, ArrowRight } from "lucide-react";
+import { BRAND } from "../../config";
 
-import React from "react";
-import "./About.css";
+const values = [
+  { icon: Target, title: "Practical first", text: "Every course is built around real projects and skills you'll actually use." },
+  { icon: Heart, title: "Learner focused", text: "Short lessons, clear explanations, and help whenever you get stuck." },
+  { icon: Rocket, title: "Open to teach", text: "Anyone with expertise can become an instructor and share what they know." },
+];
 
-const About = () => {
-  return (
-    <section className="about-section">
-
-      <div className="about-container">
-
-        <div className="about-text">
-          <h1>Empowering Learning Everywhere</h1>
-
-          <p>
-            Our platform is designed to make learning simple, engaging,
-            and practical. We focus on providing high-quality courses
-            that help students develop real skills through clear
-            explanations and hands-on examples.
-          </p>
-
-          <p>
-            Whether you are a beginner or someone looking to upgrade
-            your skills, our courses are built to help you learn at
-            your own pace and gain confidence in modern technologies.
-          </p>
-        </div>
-
-        <div className="about-features">
-
-          <div className="feature-card">
-            <h3>📚 Practical Courses</h3>
-            <p>Learn through real projects and industry examples.</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>🎓 Student Focused</h3>
-            <p>Designed to make complex topics simple and clear.</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>🚀 Career Growth</h3>
-            <p>Build skills that help you grow in real careers.</p>
-          </div>
-
-        </div>
-
+const About = () => (
+  <>
+    <section className="hero about-hero">
+      <div className="container narrow" style={{ textAlign: "center" }}>
+        <span className="eyebrow">About {BRAND}</span>
+        <h1 className="about-title">Making quality education simple and accessible.</h1>
+        <p className="about-lead">
+          {BRAND} is a learning platform where instructors publish video courses and students learn at their own pace —
+          with an AI tutor and direct doubt support along the way.
+        </p>
       </div>
-
     </section>
-  );
-};
+    <section className="section" style={{ paddingTop: 24 }}>
+      <div className="container">
+        <div className="features">
+          {values.map(({ icon: Icon, title, text }) => (
+            <div className="feature" key={title}>
+              <div className="feature-icon">
+                <Icon size={22} />
+              </div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="about-story card card-pad">
+          <h2>How it works</h2>
+          <ol className="steps">
+            <li>
+              <strong>Browse & enroll.</strong> Find a course in the catalog — free courses unlock instantly, paid ones use
+              secure Razorpay checkout.
+            </li>
+            <li>
+              <strong>Learn at your pace.</strong> Watch lectures in order, track your progress and come back anytime.
+            </li>
+            <li>
+              <strong>Get unstuck.</strong> Ask the AI tutor for instant explanations, or send a doubt straight to your
+              instructor.
+            </li>
+          </ol>
+          <Link to="/courses" className="btn btn-primary" style={{ marginTop: 8 }}>
+            Explore courses <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  </>
+);
 
 export default About;
