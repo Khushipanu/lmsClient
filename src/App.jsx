@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { UserData } from "./context/UserContext";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import AiFab from "./components/AiFab";
 import { PageLoader, ProtectedRoute } from "./components/ui";
 
 import Home from "./pages/home/Home";
@@ -105,6 +106,7 @@ const App = () => {
         </Routes>
       </main>
       <Footer />
+      <AiFab />
       <Toaster
         position="top-center"
         toastOptions={{

@@ -16,7 +16,7 @@ import { CourseData } from "../../context/courseContext";
 import { UserData } from "../../context/UserContext";
 import CourseCard, { CourseCardSkeleton } from "../../components/CourseCard";
 import { Avatar, EmptyState } from "../../components/ui";
-import { isEnrolled } from "../../utils/imageUrl";
+import { formatPrice, getImageUrl, isEnrolled, onImageError } from "../../utils/imageUrl";
 
 const features = [
   {
@@ -63,6 +63,12 @@ const Home = () => {
   const categories = useMemo(() => [...new Set(courses.map((c) => c.category).filter(Boolean))], [courses]);
   const totalLectures = courses.reduce((n, c) => n + (c.lectureCount || 0), 0);
   const featured = courses.slice(0, 6);
+  // Hero: the course with the most lectures, plus a few others as thumbnails.
+  const spotlight = useMemo(
+    () => [...courses].sort((a, b) => (b.lectureCount || 0) - (a.lectureCount || 0))[0],
+    [courses]
+  );
+  const others = courses.filter((c) => c._id !== spotlight?._id).slice(0, 3);
 
   const onSearch = (e) => {
     e.preventDefault();
@@ -108,35 +114,60 @@ const Home = () => {
             )}
           </div>
 
-          <div className="hero-visual fade-up" aria-hidden="true">
-            <div className="hero-card main">
-              <div className="hero-card-thumb">
-                <PlayCircle size={46} />
-              </div>
-              <div className="hero-card-body">
-                <span className="badge badge-primary">Lesson 4 of 12</span>
-                <strong>Building your first REST API</strong>
-                <div className="progress">
-                  <span style={{ width: "34%" }} />
+          <div className="hero-visual fade-up">
+            {spotlight ? (
+              <Link to={isEnrolled(user, spotlight._id) ? `/lecture/${spotlight._id}` : `/course/${spotlight._id}`} className="hero-card main">
+                <div className="hero-card-thumb">
+                  <img src={getImageUrl(spotlight.image)} alt="" onError={onImageError} />
+                  <span className="hero-card-tag">
+                    <Star size={12} fill="currentColor" /> Featured course
+                  </span>
+                </div>
+                <div className="hero-card-body">
+                  <span className="hero-card-cat">{spotlight.category}</span>
+                  <strong>{spotlight.title}</strong>
+                  <div className="hero-card-meta">
+                    <span>
+                      <PlayCircle size={14} /> {spotlight.lectureCount || 0} lectures
+                    </span>
+                    {spotlight.createdBy?.name && <span>by {spotlight.createdBy.name}</span>}
+                    <b className={!spotlight.price ? "free" : ""}>{formatPrice(spotlight.price)}</b>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="hero-card main hero-card-empty" aria-hidden="true">
+                <div className="hero-card-thumb">
+                  <GraduationCap size={52} />
+                </div>
+                <div className="hero-card-body">
+                  <strong>{coursesLoading ? "Loading courses…" : "New courses are on the way"}</strong>
+                  <span>Instructors are preparing their first lessons.</span>
                 </div>
               </div>
-            </div>
-            <div className="hero-card float-a">
+            )}
+
+            <Link to="/bot" className="hero-card float-a">
               <Sparkles size={18} />
               <div>
-                <strong>AI Tutor</strong>
-                <span>“Here's why your loop never ends…”</span>
+                <strong>Ask the AI tutor</strong>
+                <span>Get any concept explained, 24/7 →</span>
               </div>
-            </div>
-            <div className="hero-card float-b">
-              <div className="avatar" style={{ width: 34, height: 34 }}>
-                <GraduationCap size={18} />
-              </div>
-              <div>
-                <strong>Doubt solved</strong>
-                <span>Instructor replied 2 min ago</span>
-              </div>
-            </div>
+            </Link>
+
+            {others.length > 0 && (
+              <Link to="/courses" className="hero-card float-b">
+                <div className="hero-thumbs">
+                  {others.map((c) => (
+                    <img key={c._id} src={getImageUrl(c.image)} alt="" onError={onImageError} />
+                  ))}
+                </div>
+                <div>
+                  <strong>{courses.length} courses</strong>
+                  <span>Browse the catalog →</span>
+                </div>
+              </Link>
+            )}
           </div>
         </div>
 

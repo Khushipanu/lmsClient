@@ -42,7 +42,7 @@ const Header = () => {
     { to: "/", label: "Home", end: true },
     { to: "/courses", label: "Courses" },
     ...(isAuth ? [{ to: isInstructor ? "/admin/dashboard" : "/dashboard", label: isInstructor ? "Teach" : "My learning" }] : []),
-    ...(isAuth ? [{ to: "/bot", label: "AI Tutor" }] : []),
+    { to: "/bot", label: "AI Tutor" }, // logged-out visitors are sent to login, then back here
     { to: "/about", label: "About" },
   ];
 
