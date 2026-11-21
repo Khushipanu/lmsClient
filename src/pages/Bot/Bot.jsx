@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import Markdown from "react-markdown";
 import { Send, Sparkles, RotateCcw, WifiOff } from "lucide-react";
 import { API_URL } from "../../config";
+import { getAccessToken, refreshSession } from "../../api/axios";
 import { UserData } from "../../context/UserContext";
 import { Avatar } from "../../components/ui";
 
@@ -27,13 +28,28 @@ const Bot = () => {
 
   useEffect(() => {
     const s = io(API_URL, {
-      auth: { token: localStorage.getItem("token") },
+      // A function, so every (re)connect sends the latest access token.
+      auth: (cb) => cb({ token: getAccessToken() }),
       transports: ["websocket", "polling"],
       reconnectionAttempts: 10,
     });
     s.on("connect", () => setStatus("online"));
     s.on("disconnect", () => setStatus("offline"));
-    s.on("connect_error", () => setStatus("offline"));
+    let refreshed = false;
+    s.on("connect_error", (err) => {
+      // Access token expired → refresh it once and reconnect.
+      if (err.message === "token_expired" && !refreshed) {
+        refreshed = true;
+        refreshSession()
+          .then(() => s.connect())
+          .catch(() => setStatus("offline"));
+        return;
+      }
+      setStatus("offline");
+    });
+    s.on("connect", () => {
+      refreshed = false;
+    });
     s.on("ai-message-response", (text) => {
       setThinking(false);
       setMessages((m) => [...m, { id: Date.now(), sender: "bot", text }]);

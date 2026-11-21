@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { LogOut, Mail, Calendar, BookOpen, GraduationCap, LayoutDashboard } from "lucide-react";
-import api, { getErrorMessage } from "../../api/axios";
+import api, { getErrorMessage, saveTokens } from "../../api/axios";
 import { UserData } from "../../context/UserContext";
 import { CourseData } from "../../context/courseContext";
 import { Avatar, SubmitButton } from "../../components/ui";
@@ -22,6 +22,7 @@ const Account = () => {
     setBusy(true);
     try {
       const { data } = await api.put("/api/user/profile", payload);
+      saveTokens(data); // a password change signs out other devices and returns new tokens
       setUser(data.user);
       toast.success(data.message);
       onDone?.();

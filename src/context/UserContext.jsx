@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import api, { getErrorMessage } from "../api/axios";
+import api, { clearTokens, getAccessToken, getErrorMessage, getRefreshToken, saveTokens } from "../api/axios";
 
 const UserContext = createContext();
 
@@ -11,13 +11,15 @@ export const UserContextProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const clearSession = useCallback(() => {
-    localStorage.removeItem("token");
+    clearTokens();
     setUser(null);
     setIsAuth(false);
   }, []);
 
   const fetchUser = useCallback(async () => {
-    if (!localStorage.getItem("token")) {
+    // No access token but a refresh token? The request below gets a 401 and
+    // the axios interceptor refreshes the session automatically.
+    if (!getAccessToken() && !getRefreshToken()) {
       clearSession();
       setLoading(false);
       return null;
@@ -84,7 +86,7 @@ export const UserContextProvider = ({ children }) => {
     setBtnLoading(true);
     try {
       const { data } = await api.post("/api/user/login", { email, password });
-      localStorage.setItem("token", data.token);
+      saveTokens(data);
       setUser(data.user);
       setIsAuth(true);
       toast.success(data.message);
@@ -97,12 +99,15 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
-  async function loginWithToken(token) {
-    localStorage.setItem("token", token);
+  async function loginWithToken(accessToken, refreshToken) {
+    saveTokens({ accessToken, refreshToken });
     return fetchUser();
   }
 
   function logout() {
+    // Revoke the refresh token on the server (fire-and-forget), then forget both tokens.
+    const refreshToken = getRefreshToken();
+    if (refreshToken) api.post("/api/user/logout", { refreshToken }).catch(() => {});
     clearSession();
     toast.success("Logged out");
   }
